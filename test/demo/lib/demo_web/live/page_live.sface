@@ -1,0 +1,6 @@
+<div>
+  <h1> Hi from Surface </h1>
+
+  <React component="HelloWorld" props={{@component_props}}/>
+  
+</div>
