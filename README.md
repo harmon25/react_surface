@@ -9,7 +9,7 @@ This keeps the components internal state intact when props are updated from the 
 
 ### On the Server in a Surface component
 
-Where `props` is a map of JSON serialiable values.
+Where `props` is a map of JSON serializable values.
 
 ```
  <React component="HelloReactSurface" props={{ %{name: "Doug"} }}/>
