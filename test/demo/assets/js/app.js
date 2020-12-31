@@ -16,19 +16,23 @@ import "phoenix_html";
 import { Socket } from "phoenix";
 import NProgress from "nprogress";
 import { LiveSocket } from "phoenix_live_view";
+
+// import components
 import HelloReactSurface from "./components/HelloReactSurface";
+// import buildHook function from `react_surface`
 import { buildHook } from "react_surface";
 
-// create a map of your components
-// use function to re render components when they change from server...
+// pass components object to buildHook function
+// returns an hooks object that can be merged with existing liveview hooks object,
+// or passed directly to hooks liveSocket option if it is the only hook.
+const hooks = buildHook({ HelloReactSurface });
 
-const rs_hooks = buildHook({ HelloReactSurface });
-
+// regular liveview setup.
 let csrfToken = document
   .querySelector("meta[name='csrf-token']")
   .getAttribute("content");
 let liveSocket = new LiveSocket("/live", Socket, {
-  hooks: rs_hooks,
+  hooks,
   params: { _csrf_token: csrfToken },
 });
 
