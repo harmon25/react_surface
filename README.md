@@ -35,6 +35,7 @@ import HelloReactSurface from "./components/HelloReactSurface";
 // use the buildHook function to build a hook for LiveView.
 import { buildHook } from "react_surface";
 
+// create a components object that our hook will use to resolve a component
 const components = {HelloReactSurface};
 const reactSurfaceHook = buildHook(components)
 // OR: const {__ReactSurface} = buildHook(components)
@@ -57,7 +58,7 @@ let liveSocket = new LiveSocket("/live", Socket, {
 LiveView events can be accessed via the `useLiveContext` React hook exported from the javascript package.
 This hook returns an object with the functions: `{handleEvent, pushEvent, pushEventTo}`
 
-See the `test/demo` phoenix app for an example.
+See the `test/demo/assets/components/HelloReactSurface.js` component for an example.
 
 ## Installation
 
@@ -70,6 +71,25 @@ def deps do
     {:react_surface, "~> 0.1.0"}
   ]
 end
+```
+
+From github:
+
+```elixir
+def deps do
+  [
+    {:react_surface, github: "harmon25/react_surface"}
+  ]
+end
+```
+
+Add `react_surface` as a dep in your package.json
+
+```json
+{
+  ...
+  "react_surface": "file:../deps/react_surface"
+}
 ```
 
 ## How to add react to your phoenix app
