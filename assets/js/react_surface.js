@@ -1,73 +1,85 @@
 import React from "react";
 import ReactDOM from "react-dom";
 
-const defaultOpts = { debug: false, attributeName: "rs-comp" };
+const defaultOpts = {
+  debug: false,
+  attributeName: "rs-comp",
+  hookName: "__React",
+};
 
-/**
- *
- * @param {Object} components
- * @param {Object} opts
- */
-export default function initReactSurface(components = {}, opts = defaultOpts) {
-  // find all nodes with attribute
-  opts = { ...defaultOpts, ...opts };
-  const elements = document.querySelectorAll(`[${opts.attributeName}]`);
+// const elements = document.querySelectorAll(`[${opts.attributeName}]`);
 
-  // loop over found elements, and render em
-  for (let el of elements) {
-    parseAttrAndRender(el);
-  }
+const LiveContext = React.createContext({});
 
-  // returns a function that can be used to update when new props are passed
-  // via onBeforeElUpdated dom hook...
-  return (from, to) => {
-    //
-    if (from.__rs) {
-      parseAttrAndRender(to, from);
-    }
-  };
+export const useLiveContext = () => {
+  return React.useContext(LiveContext);
+};
 
-  function parseAttrAndRender(el, from = null) {
-    // grab attributes value string and parse as json.
-
-    let [compName, newProps] = JSON.parse(
-      el.attributes[opts.attributeName].value
-    );
-
-    if (!components[compName])
-      throw `Component with name ${compName} not provided via component param`;
-
-    let [oldCount, oldProps] = from
-      ? [from.__rs.renderedCount, from.__rs.comp.props]
-      : [0, {}];
-
-    let mergedProps = {
-      ...oldProps,
-      ...newProps,
-    };
-    // lookup component by name (rather do a dynamic import..), create the react element
-    el.__rs = {
-      name: compName,
-      comp: React.createElement(components[compName], mergedProps),
-      renderedCount: oldCount + 1,
-    };
-    if (opts.debug) {
-      console.log(el.__rs);
-    }
-    // console.log(Object.keys(el));
-
-    // render the element
-    ReactDOM.render(el.__rs.comp, el);
-
-    // console.log(Object.keys(el));
-  }
+function LiveContextProvider({ children, ...events }) {
+  return (
+    <LiveContext.Provider value={events}> {children} </LiveContext.Provider>
+  );
 }
 
-// consider a hook?
-// const ReactSurface = {
-//   mounted(){ },
-//   updated(){ },
-//   destroyed(){ },
-// };
+export function buildHook(components = {}, opts = defaultOpts) {
+  opts = { ...defaultOpts, ...opts };
 
-// export default ReactSurface;
+  const __ReactSurface = {
+    mounted() {
+      let [compName, newProps] = JSON.parse(
+        this.el.attributes[opts.attributeName].value
+      );
+      if (opts.debug) console.log("mounted ", [compName, newProps]);
+      if (!components[compName])
+        throw `Component with name ${compName} not provided via component param`;
+
+      const handleEvent = this.handleEvent.bind(this);
+      const pushEvent = this.pushEvent.bind(this);
+      const pushEventTo = this.pushEventTo.bind(this);
+      this._ReactSurface = {
+        name: compName,
+        contextProps: {
+          handleEvent,
+          pushEvent,
+          pushEventTo,
+        },
+        props: newProps,
+        renderedCount: 1,
+      };
+
+      this._ReactSurface.comp = React.createElement(
+        LiveContextProvider,
+        this._ReactSurface.contextProps,
+        React.createElement(components[compName], this._ReactSurface.props)
+      );
+
+      ReactDOM.render(this._ReactSurface.comp, this.el.lastChild);
+    },
+    updated() {
+      let [compName, newProps] = JSON.parse(
+        this.el.attributes[opts.attributeName].value
+      );
+      if (opts.debug) console.log("updated ", [compName, newProps]);
+      const { name, renderedCount } = this._ReactSurface;
+
+      if (compName !== name)
+        console.warn("Previous component differs from updated component");
+
+      this._ReactSurface.renderedCount = renderedCount + 1;
+      this._ReactSurface.props = newProps;
+      this._ReactSurface.comp = React.createElement(
+        LiveContextProvider,
+        this._ReactSurface.contextProps,
+        React.createElement(components[name], this._ReactSurface.props)
+      );
+
+      ReactDOM.hydrate(this._ReactSurface.comp, this.el.lastChild);
+    },
+    destroyed() {
+      if (opts.debug) console.log(`Destroying `, this._ReactSurface.name);
+      ReactDOM.unmountComponentAtNode(this.el.lastChild);
+    },
+  };
+
+  return { __ReactSurface };
+}

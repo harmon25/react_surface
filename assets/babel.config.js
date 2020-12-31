@@ -9,6 +9,7 @@ module.exports = {
         },
       },
     ],
+    "@babel/preset-react",
   ],
   env: {
     test: {

@@ -16,21 +16,20 @@ import "phoenix_html";
 import { Socket } from "phoenix";
 import NProgress from "nprogress";
 import { LiveSocket } from "phoenix_live_view";
-import HelloWorld from "./components/HelloWord";
-import initReactSurface from "react_surface";
+import HelloReactSurface from "./components/HelloReactSurface";
+import { buildHook } from "react_surface";
 
 // create a map of your components
-const components = { HelloWorld };
 // use function to re render components when they change from server...
-const onBeforeElUpdated = initReactSurface(components);
+
+const rs_hooks = buildHook({ HelloReactSurface });
 
 let csrfToken = document
   .querySelector("meta[name='csrf-token']")
   .getAttribute("content");
 let liveSocket = new LiveSocket("/live", Socket, {
-  // hooks: { ReactSurface },
+  hooks: rs_hooks,
   params: { _csrf_token: csrfToken },
-  dom: { onBeforeElUpdated },
 });
 
 // Show progress bar on live navigation and form submits
