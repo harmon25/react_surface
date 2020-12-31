@@ -1,5 +1,4 @@
 const path = require("path");
-const glob = require("glob");
 const HardSourceWebpackPlugin = require("hard-source-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const TerserPlugin = require("terser-webpack-plugin");
@@ -21,7 +20,6 @@ module.exports = (env, options) => {
     },
     output: {
       filename: "js/[name].js",
-      // chunkFilename: "js/[name]-[].js",
       publicPath: "/",
       path: path.resolve(__dirname, "../priv/static"),
     },

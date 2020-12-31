@@ -1,6 +1,8 @@
 import React, { useEffect } from "react";
 import { useLiveContext } from "react_surface";
-const HelloReactSurface = ({ name = "doug" }) => {
+
+// props are provided by the server.
+const HelloReactSurface = (props) => {
   const [count, setCount] = React.useState(0);
   const { pushEvent, handleEvent, pushEventTo } = useLiveContext();
 
@@ -23,7 +25,9 @@ const HelloReactSurface = ({ name = "doug" }) => {
 
   return (
     <div>
-      <h2> HELLO {name} FROM REACT!</h2>
+      <h3>Props:</h3>
+      <div>{JSON.stringify(props)}</div>
+      <br />
       <form onSubmit={handleSubmit}>
         <input type="text" name="name" placeholder="new name" />
         <button type="submit"> Update Name </button>
