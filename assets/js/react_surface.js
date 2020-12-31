@@ -9,24 +9,18 @@ const defaultOpts = {
 
 // const elements = document.querySelectorAll(`[${opts.attributeName}]`);
 
-const LiveContext = React.createContext({});
-
-export const useLiveContext = () => {
-  return React.useContext(LiveContext);
-};
-
-function LiveContextProvider({ children, ...events }) {
-  return (
-    <LiveContext.Provider value={events}> {children} </LiveContext.Provider>
-  );
-}
+export const LiveContext = React.createContext({});
+export const useLiveContext = () => React.useContext(LiveContext);
+export const LiveContextProvider = ({ children, ...events }) => (
+  <LiveContext.Provider value={events}>{children}</LiveContext.Provider>
+);
 
 export function buildHook(components = {}, opts = defaultOpts) {
   opts = { ...defaultOpts, ...opts };
 
   const __ReactSurface = {
     mounted() {
-      let [compName, newProps] = JSON.parse(
+      const [compName, newProps] = JSON.parse(
         this.el.attributes[opts.attributeName].value
       );
       if (opts.debug) console.log("mounted ", [compName, newProps]);
@@ -44,7 +38,7 @@ export function buildHook(components = {}, opts = defaultOpts) {
           pushEventTo,
         },
         props: newProps,
-        renderedCount: 1,
+        // renderedCount: 1,
       };
 
       this._ReactSurface.comp = React.createElement(
@@ -56,21 +50,25 @@ export function buildHook(components = {}, opts = defaultOpts) {
       ReactDOM.render(this._ReactSurface.comp, this.el.lastChild);
     },
     updated() {
-      let [compName, newProps] = JSON.parse(
+      const [compName, newProps] = JSON.parse(
         this.el.attributes[opts.attributeName].value
       );
       if (opts.debug) console.log("updated ", [compName, newProps]);
-      const { name, renderedCount } = this._ReactSurface;
+      const {
+        name,
+        // renderedCount
+      } = this._ReactSurface;
 
       if (compName !== name)
         console.warn("Previous component differs from updated component");
 
-      this._ReactSurface.renderedCount = renderedCount + 1;
+      this._ReactSurface.name = compName;
+      // this._ReactSurface.renderedCount = renderedCount + 1;
       this._ReactSurface.props = newProps;
       this._ReactSurface.comp = React.createElement(
         LiveContextProvider,
         this._ReactSurface.contextProps,
-        React.createElement(components[name], this._ReactSurface.props)
+        React.createElement(components[compName], this._ReactSurface.props)
       );
 
       ReactDOM.hydrate(this._ReactSurface.comp, this.el.lastChild);

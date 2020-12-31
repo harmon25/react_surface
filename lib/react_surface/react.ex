@@ -1,4 +1,10 @@
 defmodule ReactSurface.React do
+  @moduledoc """
+  Container for rendering and interacting with a react component tree in a LiveView/Surface app.
+
+  Would like to leverage a macro to perform a server render at compile time to avoid the initial page flash...
+  """
+
   use Surface.Component
 
   prop id, :string
