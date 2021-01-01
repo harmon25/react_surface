@@ -2,13 +2,28 @@ defmodule DemoWeb.PageLive do
   # use DemoWeb, :live_view
   use Surface.LiveView
   alias ReactSurface.React
+  alias ReactSurface.ReactSSR
 
   data component_props, :map, default: %{name: "Doug"}
   data show_react, :boolean, default: true
 
   def mount(_params, _session, socket) do
     IO.inspect(self())
-    {:ok, socket}
+    {:ok, assign(socket, :component_props, %{name: "Doug"})}
+  end
+
+  def render(assigns) do
+    # IO.inspect(assigns, label: "assigns")
+    ~H"""
+    <div>
+      <#ReactSSR id="another" component="HelloReactSurface.js" props={{ @component_props || %{name: "Doug"} }}/>
+
+      <React :if={{@show_react}} component="HelloReactSurface" props={{@component_props}}/>
+
+      <!-- <React id="another" :if={{@show_react}} component="HelloReactSurface" props={{@component_props}}/> -->
+        <button type="button" phx-click="toggle-react">Toggle React</button>
+    </div>
+    """
   end
 
   @impl true

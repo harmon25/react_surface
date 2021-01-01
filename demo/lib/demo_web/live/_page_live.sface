@@ -1,0 +1,12 @@
+<div>
+
+
+
+  <#ReactSSR id="another" component="HelloReactSurface" props={{ assigns.component_props }}/>
+
+ <!-- <React :if={{@show_react}} component="HelloReactSurface" props={{@component_props}}/>-->
+
+ <!-- <React id="another" :if={{@show_react}} component="HelloReactSurface" props={{@component_props}}/> -->
+  <button type="button" phx-click="toggle-react">Toggle React</button>
+
+</div>

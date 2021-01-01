@@ -15,6 +15,8 @@ defmodule ReactSurfaceTest do
 
   test "rendering a container", %{conn: conn} do
     {:ok, _view, html} = live_isolated(conn, View)
-    IO.inspect(html)
+    assert html =~ "id=\"HELLO_rs\" phx-update=\"ignore\""
+    assert html =~ "[&quot;HELLO&quot;,{&quot;test&quot;:&quot;props&quot;}]"
+    assert html =~ "phx-hook=\"__ReactSurface\""
   end
 end

@@ -27,6 +27,7 @@ react_surface-*.tar
 /tmp
 
 assets/node_modules/
+node_modules/
 
 .elixir_ls
 
