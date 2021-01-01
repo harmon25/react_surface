@@ -29,7 +29,8 @@ defmodule ReactSurface.MixProject do
   defp deps do
     [
       {:jason, "~> 1.1"},
-      {:surface, "~> 0.1.1"}
+      {:surface, "~> 0.1.1"},
+      {:floki, ">= 0.27.0", only: :test}
     ]
   end
 

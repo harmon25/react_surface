@@ -11,7 +11,7 @@ defmodule ReactSurface.ConnCase do
   using do
     quote do
       # Import conveniences for testing
-      use Surface.LiveViewTest
+      use ReactSurface.LiveViewTest
 
       # The default endpoint for testing
       @endpoint Endpoint

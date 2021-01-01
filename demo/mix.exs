@@ -48,7 +48,7 @@ defmodule Demo.MixProject do
       {:jason, "~> 1.0"},
       {:plug_cowboy, "~> 2.0"},
       {:surface, "~> 0.1.1"},
-      {:react_surface, path: "../../"}
+      {:react_surface, path: "../"}
     ]
   end
 

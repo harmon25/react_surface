@@ -17,28 +17,32 @@ defmodule ReactSurface.React do
 
   def render(%{container: :div} = assigns) do
     ~H"""
-    <div class={{@container_class}} :attrs={{build_attrs(assigns)}}><div phx-update="ignore"/></div>
+    <div class={{@container_class}} :attrs={{build_attrs(assigns)}}><div id={{build_react_id(assigns)}} phx-update="ignore"/></div>
     """
   end
 
   def render(%{container: :span} = assigns) do
     ~H"""
-    <span class={{@container_class}} :attrs={{build_attrs(assigns)}}><div phx-update="ignore"/></span>
+    <span class={{@container_class}} :attrs={{build_attrs(assigns)}}><div id={{build_react_id(assigns)}} phx-update="ignore"/></span>
     """
   end
 
   def render(%{container: :p} = assigns) do
     ~H"""
-    <p class={{@container_class}} :attrs={{build_attrs(assigns)}}><div phx-update="ignore"/></p>
+    <p class={{@container_class}} :attrs={{build_attrs(assigns)}}><div id={{build_react_id(assigns)}} phx-update="ignore"/></p>
     """
   end
 
-  defp build_attrs(%{component: component, props: props_map, hook_name: hkname} = props, other_attrs \\ []) do
+  defp build_attrs(
+         %{component: component, props: props_map, hook_name: hkname} = props,
+         other_attrs \\ []
+       ) do
     encoded = Jason.encode!([component, props_map])
 
-    Keyword.merge(other_attrs, ["rs-comp": encoded, "phx-hook": hkname, id: build_id(props)])
+    Keyword.merge(other_attrs, "rs-comp": encoded, "phx-hook": hkname, id: build_id(props))
   end
 
   defp build_id(%{id: nil, component: comp}), do: comp
   defp build_id(%{id: id, component: comp}), do: "#{id}_#{comp}"
+  defp build_react_id(assigns), do: build_id(assigns) <> "_rs"
 end
