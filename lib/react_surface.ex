@@ -2,22 +2,20 @@ defmodule ReactSurface do
   @moduledoc """
   Documentation for `ReactSurface`.
   """
-  def ssr(component_name \\ "HelloReactSurface.js", props \\ %{}, opts \\ []) do
+  def ssr(component_name \\ "HelloReactSurface.js", props, opts \\ []) do
+    # start up node worker - for use in compilation - but not runtime.
+    {:ok, pid} = NodeJS.start_link(path: "#{File.cwd!()}/assets", pool_size: 1)
     opts = Keyword.merge(opts, default_opts())
-    ssr_script = "assets/ssr.js"
 
     component_name = "#{opts[:component_path]}/#{component_name}"
 
-    {component_str, 0} =
-      System.cmd(
-        "node",
-        [ssr_script, component_name, Jason.encode!(props)],
-        env: [
-          {"NODE_PATH", opts[:node_path]}
-        ]
-      )
+    {:ok, %{"markup" => html}} =
+      NodeJS.call({:ssr, :render}, [component_name, props], binary: true)
 
-    component_str
+    # kill this after we are done calling it.
+    Process.exit(pid, :normal)
+
+    html
   end
 
   def default_opts() do

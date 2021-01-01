@@ -24,6 +24,7 @@ module.exports = (env, options) => {
       path: path.resolve(__dirname, "../priv/static"),
     },
     resolve: {
+      symlinks: false,
       alias: {
         react: path.resolve(__dirname, "./node_modules/react"),
         "react-dom": path.resolve(__dirname, "./node_modules/react-dom"),

@@ -1,9 +1,9 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useLiveContext } from "react_surface";
 
 // props are provided by the server.
-const HelloReactSurface = (props) => {
-  const [count, setCount] = React.useState(0);
+export default (props) => {
+  const [count, setCount] = useState(0);
   const { pushEvent, handleEvent, pushEventTo } = useLiveContext();
 
   useEffect(() => {
@@ -44,5 +44,3 @@ const HelloReactSurface = (props) => {
     </div>
   );
 };
-
-export default HelloReactSurface;

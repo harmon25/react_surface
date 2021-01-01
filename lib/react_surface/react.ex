@@ -2,46 +2,39 @@ defmodule ReactSurface.React do
   @moduledoc """
   Container for rendering and interacting with a react component tree in a LiveView/Surface app.
 
-  Would like to leverage a macro to perform a server render at compile time to avoid the initial page flash...
+  # SSR prop should not be set manually - is done automatically when using the SSR macro
   """
-
   use Surface.Component
 
   prop id, :string
-  prop component, :string, required: true
+  prop component, :string
   prop props, :map, default: %{}
   prop container_class, :css_class, default: []
   prop opts, :keyword, default: []
-  prop container, :atom, values: [:div, :span, :p], default: :div
-  prop hook_name, :string, default: "__ReactSurface"
+  prop ssr, :boolean, default: false
+  slot default
 
-  def render(%{container: :div} = assigns) do
-    ~H"""
-    <div class={{@container_class}} :attrs={{build_attrs(assigns)}}><div id={{build_react_id(assigns)}} phx-update="ignore"/></div>
-    """
-  end
-
-  def render(%{container: :span} = assigns) do
-    ~H"""
-    <span class={{@container_class}} :attrs={{build_attrs(assigns)}}><div id={{build_react_id(assigns)}} phx-update="ignore"/></span>
-    """
-  end
-
-  def render(%{container: :p} = assigns) do
-    ~H"""
-    <p class={{@container_class}} :attrs={{build_attrs(assigns)}}><div id={{build_react_id(assigns)}} phx-update="ignore"/></p>
-    """
+  def render(assigns) do
+    ~H"<div class={{@container_class}} :attrs={{build_attrs(assigns)}}><div id={{build_react_id(assigns)}} phx-update=\"ignore\"><slot/></div></div>"
   end
 
   defp build_attrs(
-         %{component: component, props: props_map, hook_name: hkname} = props,
+         %{component: component, props: props_map} = props,
          other_attrs \\ []
        ) do
-    encoded = Jason.encode!([component, props_map])
+    # encode props into a base64 encoded string, should be more efficient on the wire, and better easier diffs than the htmlsafe raw json string.
+    encoded_props = Jason.encode!(props_map) |> Base.encode64(padding: false)
 
-    Keyword.merge(other_attrs, "rs-comp": encoded, "phx-hook": hkname, id: build_id(props))
+    Keyword.merge(other_attrs,
+      id: build_id(props),
+      "rs-c": component,
+      "rs-p": encoded_props,
+      "phx-hook": hook_name(props)
+    )
   end
 
+  defp hook_name(%{ssr: true}), do: "__RSH"
+  defp hook_name(%{ssr: false}), do: "__RSR"
   defp build_id(%{id: nil, component: comp}), do: comp
   defp build_id(%{id: id, component: comp}), do: "#{id}_#{comp}"
   defp build_react_id(assigns), do: build_id(assigns) <> "_rs"

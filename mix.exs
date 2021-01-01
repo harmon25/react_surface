@@ -30,6 +30,7 @@ defmodule ReactSurface.MixProject do
     [
       {:jason, "~> 1.1"},
       {:surface, "~> 0.1.1"},
+      {:nodejs, "~> 2.0", runtime: false},
       {:floki, ">= 0.27.0", only: :test}
     ]
   end

@@ -1,21 +1,25 @@
-// require("@babel/polyfill");
-// require("@babel/register")({ cwd: __dirname });
-
 const ReactServer = require("react-dom/server");
 const React = require("react");
-const path = require("path");
 
 if (typeof window === "undefined") {
   global.window = {};
 }
 
-function render(cpath, props = "{}") {
-  const component = require(cpath);
-  // console.log(component);
-  const element = component.default ? component.default : component;
-  const createdElement = React.createElement(element, JSON.parse(props));
+function render(cpath, props) {
+  try {
+    const component = require(cpath);
+    const element = component.default ? component.default : component;
+    const createdElement = React.createElement(element, props);
+    const markup = ReactServer.renderToString(createdElement);
 
-  console.log(ReactServer.renderToString(createdElement));
+    return { markup, error: null, component: element.name, props };
+  } catch (e) {
+    return {
+      markup: null,
+      component: null,
+      error: { type: e.constructor.name, message: e.message, stack: e.stack },
+    };
+  }
 }
 
 module.exports = { render };

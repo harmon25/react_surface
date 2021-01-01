@@ -11,8 +11,6 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "react": ">=17",
-    "react-dom": ">=17",
     "@babel/core": "^7.9.0",
     "@babel/preset-env": "^7.9.5",
     "@babel/preset-react": "^7.12.10",

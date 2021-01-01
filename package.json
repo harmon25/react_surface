@@ -16,8 +16,5 @@
     "priv/static/react_surface.js",
     "assets/js/react_surface.js",
     "priv/ssr.js"
-  ],
-  "dependencies": {
-
-  }
+  ]
 }

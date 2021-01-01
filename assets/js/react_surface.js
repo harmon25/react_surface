@@ -1,10 +1,18 @@
 import React from "react";
 import ReactDOM from "react-dom";
 
+const COMP_ATTR = "rs-c";
+const PROP_ATTR = "rs-p";
+
 const defaultOpts = {
   debug: false,
-  attributeName: "rs-comp",
 };
+
+function extractAttrs(el) {
+  const name = el.attributes[COMP_ATTR].value;
+  const encodedProps = el.attributes[PROP_ATTR].value;
+  return [name, JSON.parse(atob(encodedProps))];
+}
 
 // const elements = document.querySelectorAll(`[${opts.attributeName}]`);
 
@@ -17,11 +25,11 @@ export const LiveContextProvider = ({ children, ...events }) => (
 export function buildHook(components = {}, opts = defaultOpts) {
   opts = { ...defaultOpts, ...opts };
 
-  const __ReactSurfaceHydrate = {
+  // SSR Hook. (hydrate)
+  const __RSH = {
     mounted() {
-      const [compName, newProps] = JSON.parse(
-        this.el.attributes[opts.attributeName].value
-      );
+      const [compName, newProps] = extractAttrs(this.el);
+
       if (opts.debug) console.log("hydrate mounted ", [compName, newProps]);
       if (!components[compName])
         throw `Component with name ${compName} not provided via component param`;
@@ -49,9 +57,8 @@ export function buildHook(components = {}, opts = defaultOpts) {
       ReactDOM.hydrate(this._ReactSurface.comp, this.el.lastChild);
     },
     updated() {
-      const [compName, newProps] = JSON.parse(
-        this.el.attributes[opts.attributeName].value
-      );
+      const [compName, newProps] = extractAttrs(this.el);
+
       if (opts.debug) console.log("updated ", [compName, newProps]);
       const {
         name,
@@ -78,11 +85,11 @@ export function buildHook(components = {}, opts = defaultOpts) {
     },
   };
 
-  const __ReactSurface = {
+  // CSR Hook. (render)
+  const __RSR = {
     mounted() {
-      const [compName, newProps] = JSON.parse(
-        this.el.attributes[opts.attributeName].value
-      );
+      const [compName, newProps] = extractAttrs(this.el);
+
       if (opts.debug) console.log("render mounted ", [compName, newProps]);
       if (!components[compName])
         throw `Component with name ${compName} not provided via component param`;
@@ -110,9 +117,8 @@ export function buildHook(components = {}, opts = defaultOpts) {
       ReactDOM.render(this._ReactSurface.comp, this.el.lastChild);
     },
     updated() {
-      const [compName, newProps] = JSON.parse(
-        this.el.attributes[opts.attributeName].value
-      );
+      const [compName, newProps] = extractAttrs(this.el);
+
       if (opts.debug) console.log("updated ", [compName, newProps]);
       const {
         name,
@@ -139,5 +145,5 @@ export function buildHook(components = {}, opts = defaultOpts) {
     },
   };
 
-  return { __ReactSurface, __ReactSurfaceHydrate };
+  return { __RSH, __RSR };
 }
