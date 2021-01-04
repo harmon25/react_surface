@@ -1,5 +1,5 @@
-const ReactServer = require("react-dom/server");
-const React = require("react");
+const {renderToString} = require("react-dom/server");
+const {createElement} = require("react");
 
 if (typeof window === "undefined") {
   global.window = {};
@@ -9,14 +9,14 @@ function render(cpath, props) {
   try {
     const component = require(cpath);
     const element = component.default ? component.default : component;
-    const createdElement = React.createElement(element, props);
-    const markup = ReactServer.renderToString(createdElement);
+    const markup = renderToString(createElement(element, props));
 
-    return { markup, error: null, component: element.name, props };
+    return { markup, error: null, props, extra: null };
   } catch (e) {
     return {
       markup: null,
       component: null,
+      extra: null,
       error: { type: e.constructor.name, message: e.message, stack: e.stack },
     };
   }

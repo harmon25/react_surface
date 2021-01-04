@@ -40,15 +40,21 @@ defmodule ReactSurface.SSR do
       @impl true
       def render(var!(assigns)) do
         ~H"""
-        <React id={{@id}} ssr={{true}} component={{component_name()}} props={{@props}}>{{ {:safe, get_ssr()} }}</React>
+        <React id={{@id}} ssr={{true}} container_class={{@container_class}} component={{component_name()}} props={{@props}}>{{ {:safe, get_ssr()} }}</React>
         """
       end
 
       @component_name Module.split(__MODULE__) |> List.last()
+
+
       Module.put_attribute(
         __MODULE__,
         :rendered_content,
-        ReactSurface.ssr(@component_name <> ".js", opts[:default_props])
+        ReactSurface.ssr(
+          @component_name,
+          opts[:default_props],
+          Keyword.merge(ReactSurface.default_opts(), opts)
+        )
       )
 
       def get_ssr() do

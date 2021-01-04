@@ -33,7 +33,9 @@ defmodule ReactSurface.React do
     )
   end
 
+  # hydration hook
   defp hook_name(%{ssr: true}), do: "__RSH"
+  # clientside render hook
   defp hook_name(%{ssr: false}), do: "__RSR"
   defp build_id(%{id: nil, component: comp}), do: comp
   defp build_id(%{id: id, component: comp}), do: "#{id}_#{comp}"

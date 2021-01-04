@@ -3,7 +3,7 @@ defmodule DemoWeb.PageLive do
   use Surface.LiveView
   alias ReactSurface.React
   alias ReactSurface.ReactSSR
-  alias DemoWeb.HelloReactSurface
+  alias DemoWeb.{HelloReactSurface, Simple}
 
   data component_props, :map, default: %{name: "Doug"}
   data show_react, :boolean, default: true
@@ -12,13 +12,21 @@ defmodule DemoWeb.PageLive do
   def render(assigns) do
     ~H"""
     <div>
-     <HelloReactSurface id="ssr" props={{@component_props}}/>
+     <Simple id="simple_ssr" props={{@component_props}} />
      <React :if={{@show_react}} component="HelloReactSurface" props={{@component_props}}/>
-     <React id="another" :if={{@show_react}} component="HelloReactSurface" props={{@component_props}}/>
+
      <button type="button" phx-click="toggle-react">Toggle React</button>
     </div>
     """
   end
+  # <HelloReactSurface id="ssr" props={{@component_props}}/>
+
+  #   <React :if={{@show_react}} component="HelloReactSurface" props={{@component_props}}/>
+  # <HelloReactSurface id="ssr" props={{@component_props}}/>
+
+  # <React :if={{@show_react}} component="Simple" props={{@component_props}}/>
+  # <React :if={{@show_react}} component="HelloReactSurface" props={{@component_props}}/>
+  # <React id="another" :if={{@show_react}} component="HelloReactSurface" props={{@component_props}}/>
 
   # @impl true
   # def handle_info({:update_name, name}, socket) do

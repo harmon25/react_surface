@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Suspense } from "react";
 import ReactDOM from "react-dom";
 
 const COMP_ATTR = "rs-c";
@@ -6,6 +6,7 @@ const PROP_ATTR = "rs-p";
 
 const defaultOpts = {
   debug: false,
+  fallback: <div>Loading...</div>,
 };
 
 function extractAttrs(el) {
@@ -25,12 +26,13 @@ export const LiveContextProvider = ({ children, ...events }) => (
 export function buildHook(components = {}, opts = defaultOpts) {
   opts = { ...defaultOpts, ...opts };
 
+  const { fallback } = opts;
   // SSR Hook. (hydrate)
   const __RSH = {
     mounted() {
-      const [compName, newProps] = extractAttrs(this.el);
+      const [compName, initialProps] = extractAttrs(this.el);
 
-      if (opts.debug) console.log("hydrate mounted ", [compName, newProps]);
+      if (opts.debug) console.log("hydrate mounted ", [compName, initialProps]);
       if (!components[compName])
         throw `Component with name ${compName} not provided via component param`;
 
@@ -44,15 +46,15 @@ export function buildHook(components = {}, opts = defaultOpts) {
           pushEvent,
           pushEventTo,
         },
-        props: newProps,
-        // renderedCount: 1,
+        props: initialProps,
       };
 
-      this._ReactSurface.comp = React.createElement(
-        LiveContextProvider,
-        this._ReactSurface.contextProps,
-        React.createElement(components[compName], this._ReactSurface.props)
-      );
+      this._ReactSurface.all = [
+        [components[compName], this._ReactSurface.props],
+        [LiveContextProvider, this._ReactSurface.contextProps],
+      ]
+    
+      this._ReactSurface.comp = reduceComponents(this._ReactSurface.all);
 
       ReactDOM.hydrate(this._ReactSurface.comp, this.el.lastChild);
     },
@@ -71,13 +73,9 @@ export function buildHook(components = {}, opts = defaultOpts) {
       this._ReactSurface.name = compName;
       // this._ReactSurface.renderedCount = renderedCount + 1;
       this._ReactSurface.props = newProps;
-      this._ReactSurface.comp = React.createElement(
-        LiveContextProvider,
-        this._ReactSurface.contextProps,
-        React.createElement(components[compName], this._ReactSurface.props)
-      );
+      this._ReactSurface.all[0][1] = this._ReactSurface.props
 
-      ReactDOM.hydrate(this._ReactSurface.comp, this.el.lastChild);
+      ReactDOM.hydrate(reduceComponents(this._ReactSurface.all), this.el.lastChild);
     },
     destroyed() {
       if (opts.debug) console.log(`Destroying `, this._ReactSurface.name);
@@ -85,7 +83,7 @@ export function buildHook(components = {}, opts = defaultOpts) {
     },
   };
 
-  // CSR Hook. (render)
+  // CSR Hook. (client side render)
   const __RSR = {
     mounted() {
       const [compName, newProps] = extractAttrs(this.el);
@@ -108,13 +106,22 @@ export function buildHook(components = {}, opts = defaultOpts) {
         // renderedCount: 1,
       };
 
-      this._ReactSurface.comp = React.createElement(
-        LiveContextProvider,
-        this._ReactSurface.contextProps,
-        React.createElement(components[compName], this._ReactSurface.props)
-      );
+      // when this is a full client side render - check if it is lazy, and add a suspense fallback
+      this._ReactSurface.all =
+        components[compName].$$typeof &&
+        String(components[compName].$$typeof).includes("lazy")
+          ? [
+              [components[compName], this._ReactSurface.props],
+              [Suspense, { fallback }],
+              [LiveContextProvider, this._ReactSurface.contextProps],
+            ]
+          : [
+              [components[compName], this._ReactSurface.props],
+              [LiveContextProvider, this._ReactSurface.contextProps],
+            ];
+      
 
-      ReactDOM.render(this._ReactSurface.comp, this.el.lastChild);
+      ReactDOM.render(reduceComponents(this._ReactSurface.all), this.el.lastChild);
     },
     updated() {
       const [compName, newProps] = extractAttrs(this.el);
@@ -131,13 +138,9 @@ export function buildHook(components = {}, opts = defaultOpts) {
       this._ReactSurface.name = compName;
       // this._ReactSurface.renderedCount = renderedCount + 1;
       this._ReactSurface.props = newProps;
-      this._ReactSurface.comp = React.createElement(
-        LiveContextProvider,
-        this._ReactSurface.contextProps,
-        React.createElement(components[compName], this._ReactSurface.props)
-      );
+      this._ReactSurface.all[0][1] = this._ReactSurface.props
 
-      ReactDOM.hydrate(this._ReactSurface.comp, this.el.lastChild);
+      ReactDOM.hydrate(reduceComponents(this._ReactSurface.all), this.el.lastChild);
     },
     destroyed() {
       if (opts.debug) console.log(`Destroying `, this._ReactSurface.name);
@@ -146,4 +149,16 @@ export function buildHook(components = {}, opts = defaultOpts) {
   };
 
   return { __RSH, __RSR };
+}
+
+// [component, props]
+function reduceComponents(components) {
+  return components.reduce((acc, current) => {
+    let [comp, props = {}] = current;
+    if (acc === null) {
+      return React.createElement(comp, props);
+    } else {
+      return React.createElement(comp, props, acc);
+    }
+  }, null);
 }

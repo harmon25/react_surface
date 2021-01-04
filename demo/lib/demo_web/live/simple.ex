@@ -1,4 +1,4 @@
-defmodule DemoWeb.HelloReactSurface do
+defmodule DemoWeb.Simple do
   @moduledoc """
   Example of a compile time, server rendered component
   """
