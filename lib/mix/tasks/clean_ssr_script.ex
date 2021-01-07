@@ -1,4 +1,4 @@
-defmodule Mix.Tasks.CleanSsrScripts do
+defmodule Mix.Tasks.CleanSsrScript do
   @moduledoc "Cleans ssr script from assets directory"
 
   use Mix.Task
