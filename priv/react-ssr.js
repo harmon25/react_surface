@@ -1,3 +1,7 @@
+/**
+ * React SSR script, requires a component, and renders to a html string.
+ * Used by NodeSSR as the render function.
+ */
 const {renderToString} = require("react-dom/server");
 const {createElement} = require("react");
 

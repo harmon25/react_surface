@@ -2,16 +2,14 @@
 
 require("@babel/register")({ cwd: __dirname });
 // starts local http service to perform Node SSR
-const startService = require("react_surface/priv/ssr-service");
+const startService = require("elixir_node_ssr");
 // a render function that takes a component name + props and returns a json response
 const { render } = require("react_surface/priv/react-ssr");
 
 const opts = {
   port: process.argv[2] ? parseInt(process.argv[2]) : 8080,
-  debug: false,
+  debug: true,
 };
-
-console.log(`Starting SSR Service on port ${opts.port}`);
 
 // starts listening on port for render requests
 startService(render, opts);
