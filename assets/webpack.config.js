@@ -3,10 +3,6 @@ const path = require("path");
 module.exports = {
   resolve: {
     extensions: [".js"],
-    // alias: {
-    //   react: path.resolve(__dirname, "./node_modules/react"),
-    //   "react-dom": path.resolve(__dirname, "./node_modules/react-dom"),
-    // },
   },
   externals: {
     react: {
@@ -22,11 +18,11 @@ module.exports = {
       root: "ReactDOM",
     },
   },
-  entry: "./js/react_surface.js",
+  entry: "./js/react-surface.js",
   output: {
-    filename: "react_surface.js",
-    path: path.resolve(__dirname, "../priv/static"),
-    library: "react_surface",
+    filename: "react-surface.js",
+    path: path.resolve(__dirname, "../priv"),
+    library: "react-surface",
     libraryTarget: "umd",
   },
   module: {

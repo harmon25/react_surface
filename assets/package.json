@@ -1,9 +1,9 @@
 {
-  "name": "react_surface",
+  "name": "react-surface",
   "version": "0.1.0",
   "description": "Hook to render react components in a Surface Component.",
   "license": "MIT",
-  "main": "./priv/static/react_surface.js",
+  "main": "./priv/react-surface.js",
   "repository": {},
   "scripts": {
     "build": "webpack --mode production",
@@ -11,8 +11,6 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "react": ">=17",
-    "react-dom": ">=17",
     "@babel/core": "^7.9.0",
     "@babel/preset-env": "^7.9.5",
     "@babel/preset-react": "^7.12.10",
