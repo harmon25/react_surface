@@ -20,7 +20,7 @@ import { LiveSocket } from "phoenix_live_view";
 // import HelloReactSurface from "./components/HelloReactSurface";
 import components from "./components";
 // import buildHook function from `react_surface`
-import { buildHook } from "react_surface";
+import { buildHook } from "react-surface";
 
 // pass components object to buildHook function
 // returns an hooks object that can be merged with existing liveview hooks object,

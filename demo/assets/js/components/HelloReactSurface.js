@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useLiveContext } from "react_surface";
+import { useLiveContext } from "react-surface";
 
 // props are provided by the server.
 export default (props) => {

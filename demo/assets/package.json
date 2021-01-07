@@ -10,9 +10,9 @@
     "nprogress": "^0.2.0",
     "phoenix": "file:../deps/phoenix",
     "phoenix_html": "file:../deps/phoenix_html",
-    "phoenix_live_view": "file:../../../phoenix_live_view",
-    "react_surface": "file:../../../react_surface",
-    "elixir_node_ssr": "file:../deps/node_ssr",
+    "phoenix_live_view": "file:../deps/phoenix_live_view",
+    "react-surface": "file:../../../react_surface",
+    "elixir-node-ssr": "file:../../../node_ssr",
     "react": "^17.0.1",
     "react-dom": "^17.0.1"
   },

@@ -1,9 +1,9 @@
 {
-  "name": "react_surface",
+  "name": "react-surface",
   "version": "0.1.0",
   "description": "Hook to render live react components in Phoenix LiveView.",
   "license": "MIT",
-  "main": "./priv/static/react_surface.js",
+  "main": "./priv/react-surface.js",
   "author": "Doug W.",
   "repository": {
     "type": "git",
@@ -13,8 +13,8 @@
     "README.md",
     "LICENSE.md",
     "package.json",
-    "priv/static/react_surface.js",
-    "assets/js/react_surface.js",
-    "priv/ssr.js"
+    "priv/react-surface.js",
+    "assets/js/react-surface.js",
+    "priv/react-ssr.js"
   ]
 }

@@ -7,6 +7,10 @@
 # General application configuration
 use Mix.Config
 
+config :node_ssr,
+  script_path: "#{File.cwd!()}/assets/ssr.js",
+  component_path: "js/components"
+
 config :demo,
   ecto_repos: [Demo.Repo]
 

@@ -18,11 +18,11 @@ module.exports = {
       root: "ReactDOM",
     },
   },
-  entry: "./js/react_surface.js",
+  entry: "./js/react-surface.js",
   output: {
-    filename: "react_surface.js",
-    path: path.resolve(__dirname, "../priv/static"),
-    library: "react_surface",
+    filename: "react-surface.js",
+    path: path.resolve(__dirname, "../priv"),
+    library: "react-surface",
     libraryTarget: "umd",
   },
   module: {
