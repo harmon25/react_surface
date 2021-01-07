@@ -1,9 +1,73 @@
 # ReactSurface
 
-Creates a Surface + LiveView container for rendering and updating react components.
+Creates a Surface + LiveView container for rendering and updating React components.
 
-Includes a hook which will perform an initial render of the component - and when new props are provided, will hydrate the component.
-This keeps the components internal state intact when props are updated from the server.
+- Includes a liveview js hooks which will perform an initial render of the component
+  - New props provided in an update performs hydration, this keeps the components internal state intact when props are updated from the server
+- A React LiveView Context that is injected with each render/update providing access to liveview functions
+- An optional SSR macro that can assist with generating placeholder or static react markup at compile time
+  - This runs a different hook when mounting, it just performs a hydrate as the component has already been server side rendered
+
+## Client Setup
+
+Create a components object to be passed into the hook generation function
+
+*It is recommended to create a module that exports all your components.*
+
+```js 
+import {lazy} from "react"
+import Component1 from "./component1"
+import Component2 from "./component2" 
+
+// you can add some lazy loading here to keep the components out of your main bundle
+// lazily loaded components must be wrapped in a `React.Suspense` container to provide loading fallback
+export default {
+  Component1,
+  Component2,
+  Component3: lazy(()=> import("./component3"))
+}
+```
+
+```js 
+import components from "./components" 
+import { buildHook } from "react-surface";
+
+// pass component mapping to buildHook function
+const reactSurfaceHooks = buildHook(components)
+// setup liveview as normal, merging your hooks with react-surface hooks.
+let liveSocket = new LiveSocket("/live", Socket, {
+  {...otherhooks, ...reactSurfaceHooks},
+  params: { _csrf_token: csrfToken },
+});
+
+```
+
+## SSR Setup
+
+If not performing SSR via `use ReactSurface.SSR` this can be skipped.
+
+### Run mix task to create SSR script inside your asset directory.
+
+```
+mix gen_ssr_script
+```
+
+### Define `node_ssr` config in config.exs
+
+This is used to configure `node_ssr` at compile time to understand where your components are, and how many instances you are running
+
+```elixir
+config :node_ssr,
+   ports: [8080], # the ports for the render services, can be any number of unprivledged available tcp ports.
+   script_path: "#{File.cwd!()}/assets/ssr.js" # REQUIRED - this should do in most cases unless you rename or move the generated ssr.js script 
+```
+
+Optional requirements:
+``` elixir
+  component_path: "js/components" # this is the default, relative path from assets.
+  component_ext: ".js" # this is the default, to help with nodejs require statements.
+```
+
 
 ## Example
 
@@ -20,45 +84,35 @@ This will result in the following DOM being generated in Elixir.
 ```html
 <div
   id="HelloReactSurface"
-  rs-comp='["HelloReactSurface",{"name": "Doug"}]'
-  phx-hook="__ReactSurface"
+  rs-c="HelloReactSurface"
+  rs-p="eyJuYW1lIjogIkRvdWcifQo"
+  phx-hook="__RSR"
 >
-  <div phx-update="ignore"></div>
+  <div id="HelloReactSurface_rs" phx-update="ignore"></div>
 </div>
 ```
 
-### On the Client when intializing LiveView
+The props are being base64 encoded (no padding) for the DOM attribute
 
-```js
-// import your react components (considering how to do dynamic importing of these to keep em out of main bundle..)
-import HelloReactSurface from "./components/HelloReactSurface";
-// use the buildHook function to build a hook for LiveView.
-import { buildHook } from "react_surface";
+When server rendering it is the same - but with the rendered component contents as a child of the inner div.
 
-// create a components object that our hook will use to resolve a component
-const components = {HelloReactSurface};
-const reactSurfaceHook = buildHook(components)
-// OR: const {__ReactSurface} = buildHook(components)
-...
-
-// combine react surface hook with your other hooks
-const hooks = {...someotherhooks, ...reactSurfaceHook }
-// OR: const hooks = {__ReactSurface, ...someotherhooks }
-
-// pass as liveSocket hook option.
-let liveSocket = new LiveSocket("/live", Socket, {
-  hooks,
-  params: { _csrf_token: csrfToken },
-});
-
+```html
+<div
+  id="HelloReactSurface"
+  rs-c="HelloReactSurface"
+  rs-p="eyJuYW1lIjogIkRvdWcifQo"
+  phx-hook="__RSH"
+>
+  <div id="HelloReactSurface_rs" phx-update="ignore"><!-- REACT ROOT --></div>
+</div>
 ```
 
-## LiveView Hook event handling
+## LiveView event handling
 
 LiveView events can be accessed via the `useLiveContext` React hook exported from the javascript package.
 This hook returns an object with the functions: `{handleEvent, pushEvent, pushEventTo}`
 
-See the `test/demo/assets/components/HelloReactSurface.js` component for an example.
+See the `demo/assets/components/HelloReactSurface.js` component for an example.
 
 ## Installation
 
@@ -83,12 +137,12 @@ def deps do
 end
 ```
 
-Add `react_surface` as a dep in your package.json
+Add `react-surface` as a dep in your package.json
 
 ```json
 {
-  ...
-  "react_surface": "file:../deps/react_surface"
+
+  "react-surface": "file:../deps/react_surface"
 }
 ```
 
