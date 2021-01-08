@@ -2,7 +2,6 @@ defmodule DemoWeb.PageLive do
   # use DemoWeb, :live_view
   use Surface.LiveView
   alias ReactSurface.React
-  alias ReactSurface.ReactSSR
   alias DemoWeb.{HelloReactSurface, Simple}
 
   data component_props, :map, default: %{name: "Doug"}
@@ -19,20 +18,6 @@ defmodule DemoWeb.PageLive do
     </div>
     """
   end
-  # <HelloReactSurface id="ssr" props={{@component_props}}/>
-
-  #   <React :if={{@show_react}} component="HelloReactSurface" props={{@component_props}}/>
-  # <HelloReactSurface id="ssr" props={{@component_props}}/>
-
-  # <React :if={{@show_react}} component="Simple" props={{@component_props}}/>
-  # <React :if={{@show_react}} component="HelloReactSurface" props={{@component_props}}/>
-  # <React id="another" :if={{@show_react}} component="HelloReactSurface" props={{@component_props}}/>
-
-  # @impl true
-  # def handle_info({:update_name, name}, socket) do
-  #   # test setting a new name from the server
-  #   {:noreply, assign(socket, :component_props, %{name: name})}
-  # end
 
   @impl true
   def handle_event("update_name", %{"new_name" => new_name}, socket) do
