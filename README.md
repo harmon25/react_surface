@@ -58,7 +58,6 @@ This is used to configure `node_ssr` at compile time to understand where your co
 
 ```elixir
 config :node_ssr,
-   ports: [8080], # the ports for the render services, can be any number of unprivledged available tcp ports.
    script_path: "#{File.cwd!()}/assets/ssr.js" # REQUIRED - this should do in most cases unless you rename or move the generated ssr.js script 
 ```
 
