@@ -14,11 +14,10 @@ defmodule Mix.Tasks.GenSsrScript do
     const { render } = require("react-surface/priv/react-ssr");
 
     const opts = {
-      port: process.argv[2] ? parseInt(process.argv[2]) : 8080,
       debug: false,
     };
 
-    // starts listening on port for render requests
+    // starts listening on a random tcp port for render requests
     startService(render, opts);
     """
 

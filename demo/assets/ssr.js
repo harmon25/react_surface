@@ -7,7 +7,6 @@ const startService = require("elixir-node-ssr");
 const { render } = require("react-surface/priv/react-ssr");
 
 const opts = {
-  port: process.argv[2] ? parseInt(process.argv[2]) : 8080,
   debug: true,
 };
 

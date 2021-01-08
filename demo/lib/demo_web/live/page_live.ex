@@ -2,7 +2,6 @@ defmodule DemoWeb.PageLive do
   # use DemoWeb, :live_view
   use Surface.LiveView
   alias ReactSurface.React
-  alias ReactSurface.ReactSSR
   alias DemoWeb.{HelloReactSurface, Simple}
 
   data component_props, :map, default: %{name: "Doug"}
