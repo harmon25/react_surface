@@ -11,6 +11,7 @@ defmodule ReactSurface.MixProject do
       compilers: [:phoenix] ++ Mix.compilers(),
       description: description(),
       start_permanent: Mix.env() == :prod,
+      aliases: aliases(),
       deps: deps()
     ]
   end
@@ -39,6 +40,10 @@ defmodule ReactSurface.MixProject do
     """
     A helper library for rendering React components via Surface
     """
+  end
+
+  defp aliases do
+    [test: "test test/react_surface_test.exs"]
   end
 
   defp package do

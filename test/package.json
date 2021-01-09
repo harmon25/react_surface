@@ -1,0 +1,21 @@
+{
+  "name": "react-surface-test",
+  "version": "0.1.0",
+  "description": "Tests",
+  "license": "MIT",
+  "repository": {},
+  "scripts": {},
+  "dependencies": {
+    "react": ">=17",
+    "react-dom": ">=17",
+    "react-surface": "file:../",
+    "elixir-node-ssr": "file:../deps/node_ssr"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.9.0",
+    "@babel/register": "^7.12.10",
+    "@babel/preset-env": "^7.9.5",
+    "@babel/preset-react": "^7.12.10",
+    "babel-loader": "^8.1.0"
+  }
+}

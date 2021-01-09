@@ -4,27 +4,11 @@ defmodule Mix.Tasks.GenSsrScript do
   use Mix.Task
 
   def run(_args) do
-    contents = """
-    #!/bin/env node
+    source = Application.app_dir(:react_surface, "priv") <> "/ssr.js"
+    dest = "#{File.cwd!()}/assets/ssr.js"
+    File.cp!(source, dest)
 
-    require("@babel/register")({ cwd: __dirname });
-    // starts local http service to perform Node SSR
-    const startService = require("elixir-node-ssr");
-    // a render function that takes a component name + props and returns a json response
-    const { render } = require("react-surface/priv/react-ssr");
-
-    const opts = {
-      debug: false,
-    };
-
-    // starts listening on a random tcp port for render requests
-    startService(render, opts);
-    """
-
-    outfile = "#{File.cwd!()}/assets/ssr.js"
-
-    File.write!(outfile, contents)
     # make file executable.
-    File.chmod(outfile, 0o755)
+    File.chmod(dest, 0o755)
   end
 end

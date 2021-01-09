@@ -1,7 +1,26 @@
+
+
 defmodule ReactSurfaceTest do
-  use ReactSurface.ConnCase, async: true
+  use ReactSurface.ConnCase, async: false
   # doctest ReactSurface
   alias ReactSurface.React
+
+  defmodule Hello do
+    @moduledoc """
+    Test component, corresponding react component `components/Hello.js`
+    """
+    use ReactSurface.SSR, default_props: %{name: "HELLO"}
+  end
+
+  defmodule SSRView do
+    use Surface.LiveView
+
+    def render(assigns) do
+      ~H"""
+       <Hello rid="hello" props={{ %{name: "NEW NAME"} }}/>
+      """
+    end
+  end
 
   defmodule View do
     use Surface.LiveView
@@ -14,9 +33,21 @@ defmodule ReactSurfaceTest do
   end
 
   test "rendering a container", %{conn: conn} do
+    encoded_props = Jason.encode!(%{test: "props"}) |> Base.encode64(padding: false)
+
     {:ok, _view, html} = live_isolated(conn, View)
     assert html =~ "id=\"HELLO_rs\" phx-update=\"ignore\""
-    assert html =~ "[&quot;HELLO&quot;,{&quot;test&quot;:&quot;props&quot;}]"
-    assert html =~ "phx-hook=\"__ReactSurface\""
+    assert html =~ "rs-p=\"#{encoded_props}\""
+    assert html =~ "phx-hook=\"__RSR\""
   end
+
+  test "rendering a ssr container", %{conn: conn} do
+    encoded_props = Jason.encode!(%{name: "NEW NAME"}) |> Base.encode64(padding: false)
+
+    {:ok, _view, html} = live_isolated(conn, SSRView)
+    assert html =~ "rs-p=\"#{encoded_props}\""
+    assert html =~ "phx-hook=\"__RSH\""
+    assert html =~ "<h1 data-reactroot=\"\">HELLO</h1>"
+  end
+
 end

@@ -6,7 +6,7 @@ defmodule ReactSurface.React do
   """
   use Surface.Component
 
-  prop id, :string
+  prop rid, :string
   prop component, :string
   prop props, :map, default: %{}
   prop container_class, :css_class, default: []
@@ -15,7 +15,7 @@ defmodule ReactSurface.React do
   slot default
 
   def render(assigns) do
-    ~H"<div class={{@container_class}} :attrs={{build_attrs(assigns)}}><div id={{build_react_id(assigns)}} phx-update=\"ignore\"><slot/></div></div>"
+    ~H"<div class={{@container_class}} :attrs={{build_attrs(assigns)}}><div phx-update=\"ignore\" :attrs={{ [id: build_react_id(assigns)] }}><slot/></div></div>"
   end
 
   defp build_attrs(
@@ -37,7 +37,7 @@ defmodule ReactSurface.React do
   defp hook_name(%{ssr: true}), do: "__RSH"
   # clientside render hook
   defp hook_name(%{ssr: false}), do: "__RSR"
-  defp build_id(%{id: nil, component: comp}), do: comp
-  defp build_id(%{id: id, component: comp}), do: "#{id}_#{comp}"
+  defp build_id(%{rid: nil, component: comp}), do: comp
+  defp build_id(%{rid: id, component: comp}), do: "#{id}_#{comp}"
   defp build_react_id(assigns), do: build_id(assigns) <> "_rs"
 end

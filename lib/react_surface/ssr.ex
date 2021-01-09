@@ -33,14 +33,14 @@ defmodule ReactSurface.SSR do
 
       alias ReactSurface.React
 
-      prop id, :string, required: true
+      prop rid, :string, required: true
       prop props, :map, default: %{}
       prop container_class, :css_class, default: []
 
       @impl true
       def render(var!(assigns)) do
         ~H"""
-        <React id={{@id}} ssr={{true}} container_class={{@container_class}} component={{component_name()}} props={{@props}}>{{ {:safe, get_ssr()} }}</React>
+        <React rid={{@rid}} ssr={{true}} container_class={{@container_class}} component={{component_name()}} props={{@props}}>{{ {:safe, get_ssr()} }}</React>
         """
       end
 

@@ -4,9 +4,12 @@ use Mix.Config
 
 config :phoenix, :json_library, Jason
 
-# config :node_ssr,
-#   script_path: "#{File.cwd!()}/assets/ssr.js",
-  # log_prefix: "#{File.cwd!()}/logs"
+config :node_ssr,
+  count: 1,
+  script_path: "#{File.cwd!()}/test/ssr.js",
+  module_paths: ["./test/node_modules", "./test"],
+  component_path: "components"
+ # log_prefix: "#{File.cwd!()}/logs"
 
 # This configuration is loaded before any dependency and is restricted
 # to this project. If another project depends on this project, this

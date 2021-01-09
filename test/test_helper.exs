@@ -16,4 +16,6 @@ Application.put_env(:react_surface, Endpoint,
   ]
 )
 
+# Application.ensure_all_started(:node_ssr)
+
 Endpoint.start_link()
