@@ -25,7 +25,8 @@ import { buildHook } from "react-surface";
 // pass components object to buildHook function
 // returns an hooks object that can be merged with existing liveview hooks object,
 // or passed directly to hooks liveSocket option if it is the only hook.
-const hooks = buildHook(components, { debug: true });
+// const hooks = buildHook(components, { debug: true });
+const hooks = buildHook(components);
 
 // regular liveview setup.
 let csrfToken = document

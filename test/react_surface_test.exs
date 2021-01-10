@@ -17,7 +17,7 @@ defmodule ReactSurfaceTest do
 
     def render(assigns) do
       ~H"""
-       <Hello rid="hello" props={{ %{name: "NEW NAME"} }}/>
+       <Hello props={{ %{name: "NEW NAME"} }}/>
       """
     end
   end
@@ -27,7 +27,7 @@ defmodule ReactSurfaceTest do
 
     def render(assigns) do
       ~H"""
-       <React component="HELLO" props={{ %{test: "props"} }}/>
+       <React component="Hello" props={{ %{test: "props"} }}/>
       """
     end
   end
@@ -36,9 +36,9 @@ defmodule ReactSurfaceTest do
     encoded_props = Jason.encode!(%{test: "props"}) |> Base.encode64(padding: false)
 
     {:ok, _view, html} = live_isolated(conn, View)
-    assert html =~ "id=\"HELLO_rs\" phx-update=\"ignore\""
+    assert html =~ "id=\"rF7FF9E8B\" phx-update=\"ignore\""
     assert html =~ "rs-p=\"#{encoded_props}\""
-    assert html =~ "phx-hook=\"__RSR\""
+    assert html =~ "phx-hook=\"_RSR\""
   end
 
   test "rendering a ssr container", %{conn: conn} do
@@ -46,7 +46,7 @@ defmodule ReactSurfaceTest do
 
     {:ok, _view, html} = live_isolated(conn, SSRView)
     assert html =~ "rs-p=\"#{encoded_props}\""
-    assert html =~ "phx-hook=\"__RSH\""
+    assert html =~ "phx-hook=\"_RSH\""
     assert html =~ "<h1 data-reactroot=\"\">HELLO</h1>"
   end
 

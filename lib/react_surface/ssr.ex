@@ -33,14 +33,22 @@ defmodule ReactSurface.SSR do
 
       alias ReactSurface.React
 
-      prop rid, :string, required: true
+      @doc "React ID - used to generate a unique DOM ID used for container elements, uses component name if not supplied"
+      prop rid, :string
+
+      @doc "Props passed to the react component"
       prop props, :map, default: %{}
+
+      @doc "Class for container div"
       prop container_class, :css_class, default: []
+
+      @doc "Passed to container div :attrs"
+      prop opts, :keyword, default: []
 
       @impl true
       def render(var!(assigns)) do
         ~H"""
-        <React rid={{@rid}} ssr={{true}} container_class={{@container_class}} component={{component_name()}} props={{@props}}>{{ {:safe, get_ssr()} }}</React>
+        <React rid={{@rid || nil}} ssr={{true}} opts={{@opts}} container_class={{@container_class}} component={{component_name()}} props={{@props}}>{{ {:safe, get_ssr()} }}</React>
         """
       end
 
@@ -50,11 +58,7 @@ defmodule ReactSurface.SSR do
       Module.put_attribute(
         __MODULE__,
         :rendered_content,
-        ReactSurface.ssr(
-          @component_name,
-          opts[:default_props],
-          Keyword.merge(ReactSurface.default_opts(), opts)
-        )
+        ReactSurface.ssr(@component_name,  opts[:default_props] || %{})
       )
 
       def get_ssr() do

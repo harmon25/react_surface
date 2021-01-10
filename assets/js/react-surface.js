@@ -152,7 +152,7 @@ export function buildHook(components = {}, opts = defaultOpts) {
   };
 
   // return the created hook
-  return { __RSH: ClientSideHydrate, __RSR: ClientSideRender };
+  return { _RSH: ClientSideHydrate, _RSR: ClientSideRender };
 }
 
 // [component, props]

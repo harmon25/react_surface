@@ -58,13 +58,14 @@ This is used to configure `node_ssr` at compile time to understand where your co
 
 ```elixir
 config :node_ssr,
-   script_path: "#{File.cwd!()}/assets/ssr.js" # REQUIRED - this should do in most cases unless you rename or move the generated ssr.js script 
+   script_path: "#{File.cwd!()}/assets/ssr.js" # REQUIRED - this should do in most cases unless you rename or move the generated ssr.js script
 ```
 
 Optional requirements:
 ``` elixir
   component_path: "js/components" # this is the default, relative path from assets.
   component_ext: ".js" # this is the default, to help with nodejs require statements.
+  count: 1 # this is the number of node processes to launch - likely not necessary to have more than 1, unless rendering lots of components
 ```
 
 
@@ -82,27 +83,28 @@ This will result in the following DOM being generated in Elixir.
 
 ```html
 <div
-  id="HelloReactSurface"
+  id="SHA1:8"
   rs-c="HelloReactSurface"
   rs-p="eyJuYW1lIjogIkRvdWcifQo"
-  phx-hook="__RSR"
+  phx-hook="_RSR"
 >
-  <div id="HelloReactSurface_rs" phx-update="ignore"></div>
+  <div id="r <> SHA1:8" phx-update="ignore"></div>
 </div>
 ```
 
 The props are being base64 encoded (no padding) for the DOM attribute
+The ids are generated sha1 hashes, based on the component name, and optional rid prop
 
-When server rendering it is the same - but with the rendered component contents as a child of the inner div.
+When server rendering it is the same - but with the rendered component contents as a child of the inner div, and a different hook
 
 ```html
 <div
-  id="HelloReactSurface"
+  id="SHA1:8"
   rs-c="HelloReactSurface"
   rs-p="eyJuYW1lIjogIkRvdWcifQo"
-  phx-hook="__RSH"
+  phx-hook="_RSH"
 >
-  <div id="HelloReactSurface_rs" phx-update="ignore"><!-- REACT ROOT --></div>
+  <div id="r <> SHA1:8" phx-update="ignore"><!-- REACT ROOT --></div>
 </div>
 ```
 

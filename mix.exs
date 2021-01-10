@@ -4,7 +4,7 @@ defmodule ReactSurface.MixProject do
   def project do
     [
       app: :react_surface,
-      version: "0.1.0",
+      version: "0.5.0",
       elixir: "~> 1.11",
       elixirc_paths: elixirc_paths(Mix.env()),
       package: package(),
@@ -38,7 +38,7 @@ defmodule ReactSurface.MixProject do
 
   def description do
     """
-    A helper library for rendering React components via Surface
+    A helper library for rendering React components via [Surface](http://surface-demo.msaraiva.io/)
     """
   end
 
