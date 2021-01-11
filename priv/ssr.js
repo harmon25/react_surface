@@ -1,5 +1,3 @@
-#!/bin/env node
-
 require("@babel/register")({ cwd: __dirname });
 // starts local http service to perform Node SSR
 const startService = require("elixir-node-ssr");

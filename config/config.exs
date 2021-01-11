@@ -6,8 +6,8 @@ config :phoenix, :json_library, Jason
 
 config :node_ssr,
   count: 1,
-  script_path: "#{File.cwd!()}/test/ssr.js",
-  module_paths: ["./test/node_modules", "./test"],
+  assets_path: "#{File.cwd!()}/test",
+  script_name: "ssr.js",
   component_path: "components"
  # log_prefix: "#{File.cwd!()}/logs"
 
