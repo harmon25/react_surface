@@ -2,11 +2,11 @@
 
 Creates a Surface + LiveView container for rendering and updating React components.
 
-- Includes a liveview js hooks which will perform an initial render of the component
+- Includes a liveview js hook which will perform an initial render of the component
   - New props provided in an update performs hydration, this keeps the components internal state intact when props are updated from the server
 - A React LiveView Context that is injected with each render/update providing access to liveview functions
 - An optional SSR macro that can assist with generating placeholder or static react markup at compile time
-  - This runs a different hook when mounting, it just performs a hydrate as the component has already been server side rendered
+  - This runs a hydrate when mounting, as it was rendered server side
 
 ## Client Setup
 
@@ -33,13 +33,12 @@ import components from "./components"
 import { buildHook } from "react-surface";
 
 // pass component mapping to buildHook function
-const reactSurfaceHooks = buildHook(components)
+const reactSurfaceHook = buildHook(components)
 // setup liveview as normal, merging your hooks with react-surface hooks.
 let liveSocket = new LiveSocket("/live", Socket, {
-  {...otherhooks, ...reactSurfaceHooks},
+  {...otherhooks, ...reactSurfaceHook},
   params: { _csrf_token: csrfToken },
 });
-
 ```
 
 ## SSR Setup
@@ -68,7 +67,6 @@ Optional requirements:
   count: 1 # this is the number of node processes to launch - likely not necessary to have more than 1, unless rendering lots of components
 ```
 
-
 ## Example
 
 ### On the Server in a Surface component
@@ -86,7 +84,8 @@ This will result in the following DOM being generated in Elixir.
   id="SHA1:8"
   rs-c="HelloReactSurface"
   rs-p="eyJuYW1lIjogIkRvdWcifQo"
-  phx-hook="_RSR"
+  rs-m="r"
+  phx-hook="_RS"
 >
   <div id="r <> SHA1:8" phx-update="ignore"></div>
 </div>
@@ -95,14 +94,15 @@ This will result in the following DOM being generated in Elixir.
 The props are being base64 encoded (no padding) for the DOM attribute
 The ids are generated sha1 hashes, based on the component name, and optional rid prop
 
-When server rendering it is the same - but with the rendered component contents as a child of the inner div, and a different hook
+When server rendering it is similar - but with the rendered component contents as a child of the inner div on initial render, and a different hook
 
 ```html
 <div
   id="SHA1:8"
   rs-c="HelloReactSurface"
   rs-p="eyJuYW1lIjogIkRvdWcifQo"
-  phx-hook="_RSH"
+  rs-m="h"
+  phx-hook="_RS"
 >
   <div id="r <> SHA1:8" phx-update="ignore"><!-- REACT ROOT --></div>
 </div>
@@ -142,7 +142,6 @@ Add `react-surface` as a dep in your package.json
 
 ```json
 {
-
   "react-surface": "file:../deps/react_surface"
 }
 ```

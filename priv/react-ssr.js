@@ -4,6 +4,7 @@
  */
 const { renderToString } = require("react-dom/server");
 const { createElement } = require("react");
+const startService = require("elixir-node-ssr");
 
 // provide a window object...
 if (typeof window === "undefined") {
@@ -34,4 +35,4 @@ function render(componentName, props) {
   }
 }
 
-module.exports = { render };
+module.exports = { render, startService };

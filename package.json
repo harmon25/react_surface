@@ -5,6 +5,9 @@
   "license": "MIT",
   "main": "./priv/react-surface.js",
   "author": "Doug W.",
+  "dependencies": {
+    "elixir-node-ssr": "file:./deps/node_ssr"
+  },
   "repository": {
     "type": "git",
     "url": "git://github.com/harmon25/react_surface.git"
