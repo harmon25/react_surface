@@ -2,19 +2,20 @@
 
 Creates a Surface + LiveView container for rendering and updating React components.
 
-- Includes a liveview js hook which will perform an initial render of the component
-  - New props provided in an update performs hydration, this keeps the components internal state intact when props are updated from the server
-- A React LiveView Context that is injected with each render/update providing access to liveview functions
+## Features
+- LiveView js hook which performs performs rendering or hydration of the component
+- A LiveView React Context that is injected with each render/update providing access to LiveView js functions
 - An optional SSR macro that can assist with generating placeholder or static react markup at compile time
   - This runs a hydrate when mounting, as it was rendered server side
+
+In the future:
+ - Integrate Surface with [React Server Components](https://github.com/josephsavona/rfcs/blob/server-components/text/0000-server-components.md#alternatives) if possible i.e use Surface for writing the React Server Component (Surface AST -> react/jsx?) 
 
 ## Client Setup
 
 Create a components object to be passed into the hook generation function.
-Do not attempt to use `React.Suspense` with server rendered components until ReactDOMServer supports `Suspense`.
 
-*It is recommended to create a module that exports all your components.*
-
+*It is recommended to create a module that exports all your components used by react-surface.*
 `assets/js/components/index.js`:
 ```js 
 import Component1 from "./component1"
@@ -56,8 +57,10 @@ This is used to configure `node_ssr` at compile time to understand where your co
 
 ```elixir
 config :node_ssr,
-   assets_path: "#{File.cwd!()}/assets", # REQUIRED - This be the folder with assets, and a package.json file - passed to erlexec `:cd` option
-   script_name: "test.js" # this is the name of the script to be invoked - defaults to "ssr.js", can change it here.
+   # REQUIRED - This be the folder with assets, and a package.json file - passed to erlexec `:cd` option
+   assets_path: "#{File.cwd!()}/assets",
+   # this is the name of the script to be invoked - defaults to "ssr.js", can change it here.
+   script_name: "ssr.js"
 ```
 
 Optional requirements:
@@ -121,6 +124,7 @@ This hook returns an object with the functions: `{handleEvent, pushEvent, pushEv
 
 See the [HelloReactSurface.js](demo/assets/js/components/HelloReactSurface.js) component for an example.
 
+
 ## Installation
 
 If [available in Hex](https://hex.pm/docs/publish), the package can be installed
@@ -156,7 +160,7 @@ Add `react-surface` as a dep in your package.json
 
 In your assets dir:
 
-```bash
+```sh
 npm install react react-dom --save
 npm install @babel/preset-env @babel/preset-react --save-dev
 ```
@@ -165,7 +169,7 @@ Add `"@babel/preset-react"` as a babel preset in `.babelrc`
 
 Add the following to your `assets/webpack.config.js` file to ensure only a single react + react-dom is included in your bundle:
 
-```
+```javascript
 module.exports = (env, options) => ({
   // add:
   resolve: {
@@ -174,7 +178,7 @@ module.exports = (env, options) => ({
       'react-dom': path.resolve(__dirname, './node_modules/react-dom')
     }
   }
-  //
+// ...
 });
 ```
 
