@@ -15,16 +15,18 @@ Do not attempt to use `React.Suspense` with server rendered components until Rea
 
 *It is recommended to create a module that exports all your components.*
 
+`assets/js/components/index.js`:
 ```js 
-import {lazy} from "react"
 import Component1 from "./component1"
 import Component2 from "./component2" 
 
 export default {
   Component1,
-  Component2
+  Component2,
+}
 ```
 
+`assets/js/app.js`:
 ```js 
 import components from "./components" 
 import { buildHook } from "react-surface";
@@ -54,14 +56,15 @@ This is used to configure `node_ssr` at compile time to understand where your co
 
 ```elixir
 config :node_ssr,
-   script_path: "#{File.cwd!()}/assets/ssr.js" # REQUIRED - this should do in most cases unless you rename or move the generated ssr.js script
+   assets_path: "#{File.cwd!()}/assets", # REQUIRED - This be the folder with assets, and a package.json file - passed to erlexec `:cd` option
+   script_name: "test.js" # this is the name of the script to be invoked - defaults to "ssr.js", can change it here.
 ```
 
 Optional requirements:
 ``` elixir
-  component_path: "js/components" # this is the default, relative path from assets.
-  component_ext: ".js" # this is the default, to help with nodejs require statements.
-  count: 1 # this is the number of node processes to launch - likely not necessary to have more than 1, unless rendering lots of components
+  component_path: "js/components" # this is the default, relative path to your components directory from assets/.
+  component_ext: ".js" # this is the default, used with nodejs require statements
+  count: 1 # this is the number of workers in the nodejs cluster - likely not necessary to have more than 1, unless rendering lots of components
 ```
 
 ## Example
@@ -70,8 +73,14 @@ Optional requirements:
 
 Where `props` is a map of JSON serializable values.
 
-```
+```elixir
  <React component="HelloReactSurface" props={{ %{name: "Doug"} }}/>
+```
+
+Supply an `rid` when rendering multiple of the same component on the same page. (translated to DOM id attrubute)
+
+```elixir
+ <React rid="unique_id" component="HelloReactSurface" props={{ %{name: "Doug"} }}/>
 ```
 
 This will result in the following DOM being generated in Elixir.
@@ -101,7 +110,7 @@ When server rendering it is similar - but with the rendered component contents a
   rs-m="h"
   phx-hook="_RS"
 >
-  <div id="r <> SHA1:8" phx-update="ignore"><!-- REACT ROOT --></div>
+  <div id="r <> SHA1:8" phx-update="ignore"><!-- SSRed REACT ROOT --></div>
 </div>
 ```
 
@@ -110,7 +119,7 @@ When server rendering it is similar - but with the rendered component contents a
 LiveView events can be accessed via the `useLiveContext` React hook exported from the javascript package.
 This hook returns an object with the functions: `{handleEvent, pushEvent, pushEventTo}`
 
-See the `demo/assets/components/HelloReactSurface.js` component for an example.
+See the [HelloReactSurface.js](demo/assets/js/components/HelloReactSurface.js) component for an example.
 
 ## Installation
 
