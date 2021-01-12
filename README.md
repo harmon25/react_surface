@@ -10,7 +10,8 @@ Creates a Surface + LiveView container for rendering and updating React componen
 
 ## Client Setup
 
-Create a components object to be passed into the hook generation function
+Create a components object to be passed into the hook generation function.
+Do not attempt to use `React.Suspense` with server rendered components until ReactDOMServer supports `Suspense`.
 
 *It is recommended to create a module that exports all your components.*
 
@@ -19,13 +20,9 @@ import {lazy} from "react"
 import Component1 from "./component1"
 import Component2 from "./component2" 
 
-// you can add some lazy loading here to keep the components out of your main bundle
-// lazily loaded components must be wrapped in a `React.Suspense` container to provide loading fallback
 export default {
   Component1,
-  Component2,
-  Component3: lazy(()=> import("./component3"))
-}
+  Component2
 ```
 
 ```js 

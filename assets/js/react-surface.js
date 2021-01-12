@@ -16,8 +16,9 @@ export const LiveContextProvider = ({ children, ...events }) => (
 // default options for buildHook function.
 const defaultOpts = {
   debug: false,
-  fallback: <div>Loading...</div>,
 };
+
+const logPrefix = "react-surface: ";
 
 /**
  * Builds the LiveView Hooks to be passed to LiveSocket constructor.
@@ -27,14 +28,15 @@ const defaultOpts = {
  */
 export function buildHook(components = {}, opts = defaultOpts) {
   opts = { ...defaultOpts, ...opts };
-  const { fallback } = opts;
   const hook = {
     mounted() {
       const [compName, initialProps, method] = extractAttrs(this.el);
-
-      if (opts.debug) console.log("mounted ", [compName, initialProps, method]);
-      if (!components[compName])
-        throw `Component with name ${compName} not provided via component param`;
+      if (!components[compName]) {
+        // this kills LV - needs to be caught early in dev if it arises
+        throw `${logPrefix}Missing ${compName} in supplied components object (${Object.keys(
+          components
+        )})`;
+      }
 
       const handleEvent = this.handleEvent.bind(this);
       const pushEvent = this.pushEvent.bind(this);
@@ -46,153 +48,59 @@ export function buildHook(components = {}, opts = defaultOpts) {
           pushEvent,
           pushEventTo,
         },
-        props: initialProps,
       };
       // not sure if this should be a react-surface concern or if this should be something the user should be aware of. (when using react lazy + suspense)
       // when this is a full client side render - check if it is lazy, and add a suspense fallback
-      this._ReactSurface.all =
-        components[compName].$$typeof &&
-        String(components[compName].$$typeof).includes("lazy")
-          ? [
-              [components[compName], this._ReactSurface.props],
-              [Suspense, { fallback }],
-              [LiveContextProvider, this._ReactSurface.contextProps],
-            ]
-          : [
-              [components[compName], this._ReactSurface.props],
-              [LiveContextProvider, this._ReactSurface.contextProps],
-            ];
+      this._ReactSurface.all = [
+        [LiveContextProvider, this._ReactSurface.contextProps],
+        [components[compName], initialProps],
+      ];
 
-      this._ReactSurface.comp = reduceComponents(this._ReactSurface.all);
+      this._ReactSurface.comp = createComponent(this._ReactSurface.all);
 
-      if (method === "h") {
-        ReactDOM.hydrate(this._ReactSurface.comp, this.el.lastChild);
-      } else {
-        ReactDOM.render(this._ReactSurface.comp, this.el.lastChild);
-      }
+      method === "h"
+        ? ReactDOM.hydrate(this._ReactSurface.comp, this.el.lastChild)
+        : ReactDOM.render(this._ReactSurface.comp, this.el.lastChild);
+
+      if (opts.debug)
+        log("mounted " + formatLog([compName, initialProps, method]));
     },
     updated() {
       const [compName, newProps, method] = extractAttrs(this.el);
-
-      if (opts.debug) console.log("updated ", [compName, newProps, method]);
       const { name } = this._ReactSurface;
 
       if (compName !== name)
-        console.warn("Previous component differs from updated component");
+        warn("Previous component name differs from updated component name");
 
       this._ReactSurface.name = compName;
-      this._ReactSurface.props = newProps;
-      // update the props.
-      this._ReactSurface.all[0][1] = this._ReactSurface.props;
+      // update the props of the child component.
+      this._ReactSurface.all[1][1] = newProps;
 
       ReactDOM.hydrate(
-        reduceComponents(this._ReactSurface.all),
+        createComponent(this._ReactSurface.all),
         this.el.lastChild
       );
+
+      if (opts.debug) log("updated " + formatLog([compName, newProps, method]));
     },
     destroyed() {
-      if (opts.debug) console.log(`Destroying `, this._ReactSurface.name);
       ReactDOM.unmountComponentAtNode(this.el.lastChild);
+      if (opts.debug) log(`Destroyed ${this._ReactSurface.name}`);
     },
   };
 
-  // // CSR Hook. (client side render)
-  // const ClientSideRender = {
-  //   mounted() {
-  //     const [compName, newProps] = extractAttrs(this.el);
-
-  //     if (opts.debug) console.log("render mounted ", [compName, newProps]);
-  //     if (!components[compName])
-  //       throw `Component with name ${compName} not provided via component param`;
-
-  //     const handleEvent = this.handleEvent.bind(this);
-  //     const pushEvent = this.pushEvent.bind(this);
-  //     const pushEventTo = this.pushEventTo.bind(this);
-  //     this._ReactSurface = {
-  //       name: compName,
-  //       contextProps: {
-  //         handleEvent,
-  //         pushEvent,
-  //         pushEventTo,
-  //       },
-  //       props: newProps,
-  //     };
-
-  //     // not sure if this should be a react-surface concern or if this should be something the user should be aware of. (when using react lazy + suspense)
-  //     // when this is a full client side render - check if it is lazy, and add a suspense fallback
-  //     this._ReactSurface.all =
-  //       components[compName].$$typeof &&
-  //       String(components[compName].$$typeof).includes("lazy")
-  //         ? [
-  //             [components[compName], this._ReactSurface.props],
-  //             [Suspense, { fallback }],
-  //             [LiveContextProvider, this._ReactSurface.contextProps],
-  //           ]
-  //         : [
-  //             [components[compName], this._ReactSurface.props],
-  //             [LiveContextProvider, this._ReactSurface.contextProps],
-  //           ];
-
-  //     // this is the only place we are fully rendering the react component
-  //     // all other ReactDOM calls should be to hydrate the already mounted react component.
-  //     ReactDOM.render(
-  //       reduceComponents(this._ReactSurface.all),
-  //       this.el.lastChild
-  //     );
-  //   },
-  //   updated() {
-  //     const [compName, newProps] = extractAttrs(this.el);
-  //     if (opts.debug) console.log("updated ", [compName, newProps]);
-
-  //     const { name } = this._ReactSurface;
-
-  //     if (compName !== name)
-  //       console.warn("Previous component differs from updated component");
-
-  //     this._ReactSurface.name = compName;
-  //     this._ReactSurface.props = newProps;
-  //     this._ReactSurface.all[0][1] = this._ReactSurface.props;
-
-  //     ReactDOM.hydrate(
-  //       reduceComponents(this._ReactSurface.all),
-  //       this.el.lastChild
-  //     );
-  //   },
-  //   destroyed() {
-  //     if (opts.debug) console.log(`Destroying `, this._ReactSurface.name);
-  //     ReactDOM.unmountComponentAtNode(this.el.lastChild);
-  //   },
-  // };
-
   // return the created hook
   return {
-    // _RSH: ClientSideHydrate, _RSR: ClientSideRender,
     _RS: hook,
   };
 }
 
-// [component, props]
-/**
- * Accepts a list of component + prop `tuples` and generates a react tree
- * Used for wrapping a user supplied component in n providers.
- * ```
- * <3>
- *  <2>
- *   <1/>
- *  </2>
- * </3>
- * ```
- *
- * @param {[[String, Object]]} components
- */
-function reduceComponents(components) {
-  return components.reduce((acc, [comp, props = {}]) => {
-    if (acc === null) {
-      return React.createElement(comp, props);
-    } else {
-      return React.createElement(comp, props, acc);
-    }
-  }, null);
+function createComponent([parent_ctx, child_comp]) {
+  return React.createElement(
+    parent_ctx[0],
+    parent_ctx[1],
+    React.createElement(child_comp[0], child_comp[1])
+  );
 }
 
 // grab component name, and encoded component props from element attributes, and returns the decoded tuple [component, props]
@@ -201,4 +109,17 @@ function extractAttrs(el) {
   const encodedProps = el.attributes[PROP_ATTR].value;
   const method = el.attributes[METHOD_ATTR].value;
   return [name, JSON.parse(atob(encodedProps)), method];
+}
+
+// logging utils
+
+function formatLog([name, props, method]) {
+  return `\nname: ${name}\nprops: ${JSON.stringify(props)}\nmethod: ${method}`;
+}
+
+function warn(msg, ...rest) {
+  console.warn(logPrefix + msg, ...rest);
+}
+function log(msg, ...rest) {
+  console.log(logPrefix + msg, ...rest);
 }
