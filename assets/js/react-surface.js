@@ -4,6 +4,7 @@ import ReactDOM from "react-dom";
 // attribute names used on the server.
 const COMP_ATTR = "rs-c";
 const PROP_ATTR = "rs-p";
+const METHOD_ATTR = "rs-m";
 
 // some exported react utility hooks for accessing + setting up the LiveContext
 export const LiveContext = React.createContext({});
@@ -20,19 +21,18 @@ const defaultOpts = {
 
 /**
  * Builds the LiveView Hooks to be passed to LiveSocket constructor.
- * 
- * @param {Object} components 
- * @param {Object} opts 
+ *
+ * @param {Object} components
+ * @param {Object} opts
  */
 export function buildHook(components = {}, opts = defaultOpts) {
   opts = { ...defaultOpts, ...opts };
   const { fallback } = opts;
-  // SSR Hook. (hydrate)
-  const ClientSideHydrate = {
+  const hook = {
     mounted() {
-      const [compName, initialProps] = extractAttrs(this.el);
+      const [compName, initialProps, method] = extractAttrs(this.el);
 
-      if (opts.debug) console.log("hydrate mounted ", [compName, initialProps]);
+      if (opts.debug) console.log("mounted ", [compName, initialProps, method]);
       if (!components[compName])
         throw `Component with name ${compName} not provided via component param`;
 
@@ -48,20 +48,33 @@ export function buildHook(components = {}, opts = defaultOpts) {
         },
         props: initialProps,
       };
-
-      this._ReactSurface.all = [
-        [components[compName], this._ReactSurface.props],
-        [LiveContextProvider, this._ReactSurface.contextProps],
-      ];
+      // not sure if this should be a react-surface concern or if this should be something the user should be aware of. (when using react lazy + suspense)
+      // when this is a full client side render - check if it is lazy, and add a suspense fallback
+      this._ReactSurface.all =
+        components[compName].$$typeof &&
+        String(components[compName].$$typeof).includes("lazy")
+          ? [
+              [components[compName], this._ReactSurface.props],
+              [Suspense, { fallback }],
+              [LiveContextProvider, this._ReactSurface.contextProps],
+            ]
+          : [
+              [components[compName], this._ReactSurface.props],
+              [LiveContextProvider, this._ReactSurface.contextProps],
+            ];
 
       this._ReactSurface.comp = reduceComponents(this._ReactSurface.all);
 
-      ReactDOM.hydrate(this._ReactSurface.comp, this.el.lastChild);
+      if (method === "h") {
+        ReactDOM.hydrate(this._ReactSurface.comp, this.el.lastChild);
+      } else {
+        ReactDOM.render(this._ReactSurface.comp, this.el.lastChild);
+      }
     },
     updated() {
-      const [compName, newProps] = extractAttrs(this.el);
+      const [compName, newProps, method] = extractAttrs(this.el);
 
-      if (opts.debug) console.log("updated ", [compName, newProps]);
+      if (opts.debug) console.log("updated ", [compName, newProps, method]);
       const { name } = this._ReactSurface;
 
       if (compName !== name)
@@ -83,76 +96,79 @@ export function buildHook(components = {}, opts = defaultOpts) {
     },
   };
 
-  // CSR Hook. (client side render)
-  const ClientSideRender = {
-    mounted() {
-      const [compName, newProps] = extractAttrs(this.el);
+  // // CSR Hook. (client side render)
+  // const ClientSideRender = {
+  //   mounted() {
+  //     const [compName, newProps] = extractAttrs(this.el);
 
-      if (opts.debug) console.log("render mounted ", [compName, newProps]);
-      if (!components[compName])
-        throw `Component with name ${compName} not provided via component param`;
+  //     if (opts.debug) console.log("render mounted ", [compName, newProps]);
+  //     if (!components[compName])
+  //       throw `Component with name ${compName} not provided via component param`;
 
-      const handleEvent = this.handleEvent.bind(this);
-      const pushEvent = this.pushEvent.bind(this);
-      const pushEventTo = this.pushEventTo.bind(this);
-      this._ReactSurface = {
-        name: compName,
-        contextProps: {
-          handleEvent,
-          pushEvent,
-          pushEventTo,
-        },
-        props: newProps,
-      };
+  //     const handleEvent = this.handleEvent.bind(this);
+  //     const pushEvent = this.pushEvent.bind(this);
+  //     const pushEventTo = this.pushEventTo.bind(this);
+  //     this._ReactSurface = {
+  //       name: compName,
+  //       contextProps: {
+  //         handleEvent,
+  //         pushEvent,
+  //         pushEventTo,
+  //       },
+  //       props: newProps,
+  //     };
 
-      // not sure if this should be a react-surface concern or if this should be something the user should be aware of. (when using react lazy + suspense)
-      // when this is a full client side render - check if it is lazy, and add a suspense fallback
-      this._ReactSurface.all =
-        components[compName].$$typeof &&
-        String(components[compName].$$typeof).includes("lazy")
-          ? [
-              [components[compName], this._ReactSurface.props],
-              [Suspense, { fallback }],
-              [LiveContextProvider, this._ReactSurface.contextProps],
-            ]
-          : [
-              [components[compName], this._ReactSurface.props],
-              [LiveContextProvider, this._ReactSurface.contextProps],
-            ];
+  //     // not sure if this should be a react-surface concern or if this should be something the user should be aware of. (when using react lazy + suspense)
+  //     // when this is a full client side render - check if it is lazy, and add a suspense fallback
+  //     this._ReactSurface.all =
+  //       components[compName].$$typeof &&
+  //       String(components[compName].$$typeof).includes("lazy")
+  //         ? [
+  //             [components[compName], this._ReactSurface.props],
+  //             [Suspense, { fallback }],
+  //             [LiveContextProvider, this._ReactSurface.contextProps],
+  //           ]
+  //         : [
+  //             [components[compName], this._ReactSurface.props],
+  //             [LiveContextProvider, this._ReactSurface.contextProps],
+  //           ];
 
-      // this is the only place we are fully rendering the react component
-      // all other ReactDOM calls should be to hydrate the already mounted react component.
-      ReactDOM.render(
-        reduceComponents(this._ReactSurface.all),
-        this.el.lastChild
-      );
-    },
-    updated() {
-      const [compName, newProps] = extractAttrs(this.el);
-      if (opts.debug) console.log("updated ", [compName, newProps]);
+  //     // this is the only place we are fully rendering the react component
+  //     // all other ReactDOM calls should be to hydrate the already mounted react component.
+  //     ReactDOM.render(
+  //       reduceComponents(this._ReactSurface.all),
+  //       this.el.lastChild
+  //     );
+  //   },
+  //   updated() {
+  //     const [compName, newProps] = extractAttrs(this.el);
+  //     if (opts.debug) console.log("updated ", [compName, newProps]);
 
-      const { name } = this._ReactSurface;
+  //     const { name } = this._ReactSurface;
 
-      if (compName !== name)
-        console.warn("Previous component differs from updated component");
+  //     if (compName !== name)
+  //       console.warn("Previous component differs from updated component");
 
-      this._ReactSurface.name = compName;
-      this._ReactSurface.props = newProps;
-      this._ReactSurface.all[0][1] = this._ReactSurface.props;
+  //     this._ReactSurface.name = compName;
+  //     this._ReactSurface.props = newProps;
+  //     this._ReactSurface.all[0][1] = this._ReactSurface.props;
 
-      ReactDOM.hydrate(
-        reduceComponents(this._ReactSurface.all),
-        this.el.lastChild
-      );
-    },
-    destroyed() {
-      if (opts.debug) console.log(`Destroying `, this._ReactSurface.name);
-      ReactDOM.unmountComponentAtNode(this.el.lastChild);
-    },
-  };
+  //     ReactDOM.hydrate(
+  //       reduceComponents(this._ReactSurface.all),
+  //       this.el.lastChild
+  //     );
+  //   },
+  //   destroyed() {
+  //     if (opts.debug) console.log(`Destroying `, this._ReactSurface.name);
+  //     ReactDOM.unmountComponentAtNode(this.el.lastChild);
+  //   },
+  // };
 
   // return the created hook
-  return { _RSH: ClientSideHydrate, _RSR: ClientSideRender };
+  return {
+    // _RSH: ClientSideHydrate, _RSR: ClientSideRender,
+    _RS: hook,
+  };
 }
 
 // [component, props]
@@ -183,5 +199,6 @@ function reduceComponents(components) {
 function extractAttrs(el) {
   const name = el.attributes[COMP_ATTR].value;
   const encodedProps = el.attributes[PROP_ATTR].value;
-  return [name, JSON.parse(atob(encodedProps))];
+  const method = el.attributes[METHOD_ATTR].value;
+  return [name, JSON.parse(atob(encodedProps)), method];
 }

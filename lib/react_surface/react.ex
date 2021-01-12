@@ -41,14 +41,17 @@ defmodule ReactSurface.React do
       id: id,
       "rs-c": component,
       "rs-p": encoded_props,
+      "rs-m": method_name(props),
       "phx-hook": hook_name(props)
     )
   end
 
   # hydration hook
-  defp hook_name(%{ssr: true}), do: "_RSH"
+  defp hook_name(_), do: "_RS"
   # clientside render hook
-  defp hook_name(%{ssr: false}), do: "_RSR"
+  # defp hook_name(%{ssr: false}), do: "_RSR"
+  defp method_name(%{ssr: false}), do: "r"
+  defp method_name(%{ssr: true}), do: "h"
   defp build_id(%{rid: nil, component: comp}), do: ReactSurface.hash_id(comp)
   defp build_id(%{rid: id, component: comp}), do: ReactSurface.hash_id("#{id}#{comp}")
 

@@ -38,7 +38,8 @@ defmodule ReactSurfaceTest do
     {:ok, _view, html} = live_isolated(conn, View)
     assert html =~ "id=\"rF7FF9E8B\" phx-update=\"ignore\""
     assert html =~ "rs-p=\"#{encoded_props}\""
-    assert html =~ "phx-hook=\"_RSR\""
+    assert html =~ "rs-m=\"r\""
+    assert html =~ "phx-hook=\"_RS\""
   end
 
   test "rendering a ssr container", %{conn: conn} do
@@ -46,7 +47,8 @@ defmodule ReactSurfaceTest do
 
     {:ok, _view, html} = live_isolated(conn, SSRView)
     assert html =~ "rs-p=\"#{encoded_props}\""
-    assert html =~ "phx-hook=\"_RSH\""
+    assert html =~ "phx-hook=\"_RS\""
+    assert html =~ "rs-m=\"h\""
     assert html =~ "<h1 data-reactroot=\"\">HELLO</h1>"
   end
 
