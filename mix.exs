@@ -30,7 +30,7 @@ defmodule ReactSurface.MixProject do
   defp deps do
     [
       {:jason, "~> 1.1"},
-      {:surface, "~> 0.1.1"},
+      {:surface, "~> 0.2.0"},
       {:node_ssr, github: "harmon25/node_ssr", branch: "main", runtime: false},
       {:floki, ">= 0.27.0", only: :test}
     ]
